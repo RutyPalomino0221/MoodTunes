@@ -1,0 +1,464 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d0c0b">
+    <meta name="description" content="Elige cómo te sientes y MoodTunes te pone canciones que le quedan, con el clima de tu ciudad de fondo.">
+    <title>MoodTunes 🎵 Música para tu ánimo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎵%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#animos">Saltar al contenido</a>
+<noscript><p style="position:fixed;inset:0;z-index:999;display:grid;place-items:center;background:#0d0c0b;color:#f2ece4;padding:24px;text-align:center">MoodTunes necesita JavaScript para funcionar. Actívalo e inténtalo de nuevo.</p></noscript>
+<div class="scroll-progress" id="scroll-progress"></div>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="preloader" id="preloader" aria-hidden="true"><div class="pl-vinyl"></div><div class="pl-logo">MoodTunes</div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= PANTALLA DE LOGIN ================= -->
+<div class="auth-screen" id="auth-screen">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+            <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+            <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+            <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+            <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+            <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M16 7l3 3M14 9l2 2"/></symbol>
+            <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+        </defs>
+    </svg>
+
+    <div class="auth-bg" aria-hidden="true"><i></i><i></i><i></i></div>
+
+    <section class="auth-card" id="auth-card" aria-label="Acceso a MoodTunes">
+
+        <!-- ===== Lado visual: un disco que sale de su funda según el ánimo ===== -->
+        <aside class="auth-visual">
+            <div class="av-notes" id="av-notes" aria-hidden="true"></div>
+            <div class="av-logo" aria-label="MoodTunes">Mo<i></i>dTunes</div>
+
+            <div class="av-stage" id="av-stage" aria-hidden="true">
+                <div class="av-scene">
+                    <div class="av-glow"></div>
+                    <div class="av-float">
+                        <div class="av-sleeve" id="av-sleeve">
+                            <span class="em" id="av-emoji">😊</span>
+                            <div><b id="av-name">Feliz</b><small id="av-tag">Pop y baile</small></div>
+                        </div>
+                    </div>
+                    <div class="av-record"><div class="av-spin"><div class="av-label"></div></div></div>
+                    <div class="av-arm"><span class="av-arm-base"></span><span class="av-arm-bar"><span class="av-arm-head"></span></span></div>
+                </div>
+            </div>
+
+            <div class="av-eq" id="av-eq" aria-hidden="true"></div>
+
+            <div class="av-text" id="av-text">
+                <h2 id="av-title">Tu ánimo, tu música</h2>
+                <p id="av-sub">Cuéntanos cómo te sientes y armamos tu banda sonora.</p>
+            </div>
+
+            <div class="av-moods" id="av-moods" role="group" aria-label="Probar un ánimo">
+                <button type="button" class="av-mood" data-mood="feliz" aria-pressed="false" aria-label="Feliz"><span class="e">😊</span><span class="n">Feliz</span></button>
+                <button type="button" class="av-mood" data-mood="triste" aria-pressed="false" aria-label="Triste"><span class="e">😢</span><span class="n">Triste</span></button>
+                <button type="button" class="av-mood" data-mood="relajado" aria-pressed="false" aria-label="Relajado"><span class="e">😌</span><span class="n">Relajado</span></button>
+                <button type="button" class="av-mood" data-mood="motivado" aria-pressed="false" aria-label="Motivado"><span class="e">💪</span><span class="n">Motivado</span></button>
+                <button type="button" class="av-mood" data-mood="romantico" aria-pressed="false" aria-label="Romántico"><span class="e">💕</span><span class="n">Romántico</span></button>
+            </div>
+        </aside>
+
+        <!-- ===== Lado del formulario ===== -->
+        <div class="auth-box">
+            <div class="auth-tabs" id="auth-tabs" role="tablist" aria-label="Acceso" data-on="login">
+                <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="view-login">Iniciar sesión</button>
+                <button type="button" role="tab" id="tab-register" aria-selected="false" aria-controls="view-register">Suscríbete</button>
+            </div>
+
+            <!-- Entrar -->
+            <div class="auth-view" id="view-login" role="tabpanel" aria-labelledby="tab-login">
+                <h2>Qué bueno verte de nuevo</h2>
+                <p class="auth-sub">Entra para ver tus favoritas y tus playlists.</p>
+                <form id="form-login" novalidate>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-user"/></svg>
+                        <input type="text" id="login-user" placeholder=" " autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="login-user-msg" required>
+                        <label for="login-user">Usuario o correo</label>
+                        <p class="field-msg" id="login-user-msg"></p>
+                    </div>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>
+                        <input type="password" id="login-pass" placeholder=" " autocomplete="current-password" aria-describedby="login-pass-msg" required>
+                        <label for="login-pass">Contraseña</label>
+                        <button type="button" class="pw-toggle" data-for="login-pass" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line class="slash" x1="3" y1="3" x2="21" y2="21"/></svg></button>
+                        <p class="field-msg" id="login-pass-msg"></p>
+                    </div>
+                    <p class="caps" hidden>⇪ Tienes el Bloq Mayús activado</p>
+                    <div class="row-opts">
+                        <label class="check"><input type="checkbox" id="login-remember" checked><span></span>Mantener sesión iniciada</label>
+                        <button type="button" class="text-link" id="btn-to-forgot">¿Olvidaste tu contraseña?</button>
+                    </div>
+                    <button type="submit" class="btn btn-solid btn-auth">Iniciar sesión</button>
+                </form>
+            </div>
+
+            <!-- Crear cuenta -->
+            <div class="auth-view" id="view-register" role="tabpanel" aria-labelledby="tab-register" hidden>
+                <h2>Suscríbete gratis</h2>
+                <p class="auth-sub">Guarda tus canciones favoritas y arma tus playlists.</p>
+                <form id="form-register" novalidate>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-user"/></svg>
+                        <input type="text" id="reg-name" placeholder=" " autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="30" aria-describedby="reg-name-msg" required>
+                        <label for="reg-name">Nombre de usuario</label>
+                        <p class="field-msg" id="reg-name-msg"></p>
+                    </div>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"/></svg>
+                        <input type="email" id="reg-email" placeholder=" " autocomplete="email" autocapitalize="none" spellcheck="false" aria-describedby="reg-email-msg" required>
+                        <label for="reg-email">Correo electrónico</label>
+                        <p class="field-msg" id="reg-email-msg"></p>
+                    </div>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>
+                        <input type="password" id="reg-pass" placeholder=" " autocomplete="new-password" maxlength="72" aria-describedby="reg-pass-msg strength-txt" required>
+                        <label for="reg-pass">Contraseña</label>
+                        <button type="button" class="pw-toggle" data-for="reg-pass" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line class="slash" x1="3" y1="3" x2="21" y2="21"/></svg></button>
+                        <p class="field-msg" id="reg-pass-msg"></p>
+                    </div>
+                    <div class="strength" id="strength" data-level="0">
+                        <div class="st-bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                        <small id="strength-txt" aria-live="polite">Escribe una contraseña</small>
+                        <ul class="rules" id="rules">
+                            <li data-r="len">6 o más caracteres</li>
+                            <li data-r="case">Mayúscula y minúscula</li>
+                            <li data-r="num">Un número</li>
+                        </ul>
+                    </div>
+                    <p class="caps" hidden>⇪ Tienes el Bloq Mayús activado</p>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
+                        <input type="password" id="reg-pass2" placeholder=" " autocomplete="new-password" maxlength="72" aria-describedby="reg-pass2-msg" required>
+                        <label for="reg-pass2">Repite la contraseña</label>
+                        <p class="field-msg" id="reg-pass2-msg"></p>
+                    </div>
+                    <button type="submit" class="btn btn-solid btn-auth">Suscríbete</button>
+                </form>
+            </div>
+
+            <!-- Recuperar: paso 1 -->
+            <div class="auth-view" id="view-forgot" hidden>
+                <button type="button" class="back-link" id="btn-back-login-from-forgot">‹ Volver</button>
+                <h2>Recupera tu cuenta</h2>
+                <p class="auth-sub">Escribe tu usuario o correo y te damos un código de 6 dígitos.</p>
+                <form id="form-forgot" novalidate>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"/></svg>
+                        <input type="text" id="forgot-user" placeholder=" " autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="forgot-user-msg" required>
+                        <label for="forgot-user">Usuario o correo</label>
+                        <p class="field-msg" id="forgot-user-msg"></p>
+                    </div>
+                    <button type="submit" class="btn btn-solid btn-auth">Enviar código</button>
+                </form>
+            </div>
+
+            <!-- Recuperar: paso 2 -->
+            <div class="auth-view" id="view-reset" hidden>
+                <button type="button" class="back-link" id="btn-back-login-from-reset">‹ Volver</button>
+                <h2>Crea una contraseña nueva</h2>
+                <p class="auth-sub">Escribe el código y elige tu nueva contraseña.</p>
+                <p class="auth-hint" id="reset-hint" hidden></p>
+                <form id="form-reset" novalidate>
+                    <div class="field code">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-key"/></svg>
+                        <input type="text" id="reset-code" placeholder=" " inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" aria-describedby="reset-code-msg" required>
+                        <label for="reset-code">Código de 6 dígitos</label>
+                        <p class="field-msg" id="reset-code-msg"></p>
+                    </div>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>
+                        <input type="password" id="reset-pass1" placeholder=" " autocomplete="new-password" maxlength="72" aria-describedby="reset-pass1-msg" required>
+                        <label for="reset-pass1">Nueva contraseña</label>
+                        <button type="button" class="pw-toggle" data-for="reset-pass1" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line class="slash" x1="3" y1="3" x2="21" y2="21"/></svg></button>
+                        <p class="field-msg" id="reset-pass1-msg"></p>
+                    </div>
+                    <p class="caps" hidden>⇪ Tienes el Bloq Mayús activado</p>
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
+                        <input type="password" id="reset-pass2" placeholder=" " autocomplete="new-password" maxlength="72" aria-describedby="reset-pass2-msg" required>
+                        <label for="reset-pass2">Repite la contraseña</label>
+                        <p class="field-msg" id="reset-pass2-msg"></p>
+                    </div>
+                    <button type="submit" class="btn btn-solid btn-auth">Cambiar contraseña</button>
+                </form>
+                <p class="auth-switch"><button type="button" class="text-link" id="btn-resend" disabled>Reenviar código</button></p>
+            </div>
+
+            <p id="auth-error" class="auth-alert" role="alert" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"/></svg><span id="auth-error-txt"></span></p>
+            <p class="auth-trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>Conexión protegida · tus contraseñas se guardan cifradas</p>
+        </div>
+
+        <!-- Confirmación al entrar -->
+        <div class="auth-done" id="auth-done" hidden aria-live="polite">
+            <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M14 27l8 8 16-17"/></svg>
+            <p id="auth-done-txt">Listo</p>
+        </div>
+    </section>
+</div>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="inicio">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+    <div class="spectrum" id="spectrum" aria-hidden="true"></div>
+    <nav class="nav" aria-label="Principal">
+        <a class="logo" href="#inicio" aria-label="MoodTunes, inicio">Mo<i></i>dTunes</a>
+        <div class="nav-links">
+            <a href="#animos">Ánimos</a><a href="#buscar">Buscar</a><a href="#explorar">Explorar</a><a href="#biblioteca">Biblioteca</a>
+        </div>
+        <div class="user-menu">
+            <button class="user-profile-btn" id="user-profile-btn" type="button" style="display:none;" aria-haspopup="true" aria-expanded="false">
+                <span class="user-avatar" id="user-avatar">D</span>
+                <span class="user-name" id="user-name">Usuario</span>
+                <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="user-dropdown" id="user-dropdown" hidden>
+                <div class="dd-header">
+                    <span class="dd-avatar user-avatar" id="dd-avatar">D</span>
+                    <div class="dd-info"><strong id="dd-name">Usuario</strong><small id="dd-email">correo</small></div>
+                </div>
+                <button class="dd-item" id="dd-profile" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mi perfil</button>
+                <a class="dd-item" id="dd-favs" href="#favoritas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg> Mis favoritas</a>
+                <a class="dd-item" href="#biblioteca"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Mi biblioteca</a>
+                <div class="dd-divider"></div>
+                <button class="dd-item dd-danger" id="dd-logout" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Cerrar sesión</button>
+            </div>
+        </div>
+    </nav>
+    <div class="hero-grid">
+        <div class="hero-text">
+            <h1>Elige tu ánimo.<br>Crea tu <span class="brush">banda sonora</span></h1>
+            <p class="frase" id="frase"></p>
+            <p class="lead">Dinos cómo te sientes y te ponemos canciones que le quedan, con el clima de tu ciudad de fondo. Escucha, mira la portada y canta con la letra.</p>
+            <div class="cta-row">
+                <a class="btn btn-solid" href="#animos">Empezar</a>
+                <a class="btn btn-outline" href="#apis">Cómo funciona</a>
+            </div>
+            <form id="city-form" class="city-form" autocomplete="off">
+                <label for="city-input" class="sr-only">Tu ciudad</label>
+                <span class="pin" aria-hidden="true">📍</span>
+                <input type="text" id="city-input" placeholder="Tu ciudad: Lima, Bogotá, Madrid…" value="Lima">
+                <button type="submit" class="btn btn-solid" id="city-btn">Ver clima</button>
+            </form>
+            <p id="city-error" class="error" role="alert"></p>
+            <div class="stats" id="weather" aria-live="polite">
+                <div class="stat"><span class="stat-val" id="weather-temp">--°C</span><span class="stat-label">Temperatura</span></div>
+                <div class="stat"><span class="stat-val"><span id="weather-icon">🌡️</span> <span id="weather-desc">Buscando…</span></span><span class="stat-label">Clima actual</span></div>
+                <div class="stat"><span class="stat-val" id="weather-city">—</span><span class="stat-label">Tu ciudad</span></div>
+            </div>
+        </div>
+        <div class="vinyl" id="vinyl" aria-hidden="true">
+            <div class="vinyl-disc"><div class="vinyl-label"></div></div>
+            <div class="tonearm"><span class="ta-base"></span><span class="ta-arm"><span class="ta-head"></span></span></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= CINTA EN MOVIMIENTO ================= -->
+<div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+        <div class="mq-group"><span>😊 Feliz</span><b>✦</b><span>😢 Triste</span><b>✦</b><span>😌 Relajado</span><b>✦</b><span>💪 Motivado</span><b>✦</b><span>💕 Romántico</span><b>✦</b></div>
+        <div class="mq-group"><span>😊 Feliz</span><b>✦</b><span>😢 Triste</span><b>✦</b><span>😌 Relajado</span><b>✦</b><span>💪 Motivado</span><b>✦</b><span>💕 Romántico</span><b>✦</b></div>
+    </div>
+</div>
+
+<main>
+    <!-- ================= ÁNIMOS ================= -->
+    <section class="section" id="animos">
+        <h2 class="title">¿Cómo te <span class="brush">sientes</span> hoy?</h2>
+        <p class="section-lead">Toca un estado de ánimo. La app busca en iTunes y ajusta la selección según el clima.</p>
+
+        <!-- BANNER DE RECOMENDACIÓN INTELIGENTE -->
+        <div id="banner-recomendacion" class="banner-recomendacion" hidden>
+            <div class="banner-icon" aria-hidden="true">💡</div>
+            <div class="banner-text">
+                <strong id="banner-titulo">Recomendación del sistema</strong>
+                <p id="banner-mensaje">Cargando clima...</p>
+            </div>
+            <button id="banner-btn" class="btn btn-solid btn-sm" type="button">Escuchar</button>
+        </div>
+
+        <p class="sugerencia" id="sugerencia" hidden></p>
+        <div class="moods" id="moods-container">
+            <button class="mood-btn" data-mood="feliz"><span class="emoji">😊</span><span class="mood-name">Feliz</span><span class="mood-tag">Pop y baile</span></button>
+            <button class="mood-btn" data-mood="triste"><span class="emoji">😢</span><span class="mood-name">Triste</span><span class="mood-tag">Baladas y acústico</span></button>
+            <button class="mood-btn" data-mood="relajado"><span class="emoji">😌</span><span class="mood-name">Relajado</span><span class="mood-tag">Chill y lo-fi</span></button>
+            <button class="mood-btn" data-mood="motivado"><span class="emoji">💪</span><span class="mood-name">Motivado</span><span class="mood-tag">Rock y entreno</span></button>
+            <button class="mood-btn" data-mood="romantico"><span class="emoji">💕</span><span class="mood-name">Romántico</span><span class="mood-tag">Canciones de amor</span></button>
+        </div>
+        <div class="idioma" id="idioma" role="group" aria-label="Idioma de la música">
+            <span>Música en</span>
+            <button type="button" data-idioma="todo" class="on">Todo</button>
+            <button type="button" data-idioma="en">Inglés</button>
+            <button type="button" data-idioma="es">Español</button>
+            <button type="button" data-idioma="latino">Latino</button>
+        </div>
+        <p id="mood-error" class="error" role="alert"></p>
+    </section>
+
+    <!-- ================= BUSCAR ================= -->
+    <section class="section" id="buscar">
+        <h2 class="title">Busca lo que <span class="brush">quieras</span></h2>
+        <p class="section-lead">Canciones, álbumes o artistas: escribe y busca en iTunes.</p>
+        <form id="search-form" class="city-form search-form" autocomplete="off">
+            <label for="search-input" class="sr-only">Buscar música</label>
+            <input type="search" id="search-input" placeholder="¿Qué quieres escuchar?">
+            <button type="submit" class="btn btn-solid">Buscar</button>
+        </form>
+        <div class="idioma" id="tipos" role="group" aria-label="Tipo de búsqueda">
+            <button type="button" data-tipo="cancion" class="on">Canciones</button>
+            <button type="button" data-tipo="album">Álbumes</button>
+            <button type="button" data-tipo="artista">Artistas</button>
+        </div>
+        <p id="search-error" class="error" role="alert"></p>
+        <div class="songs coleccion" id="res-grid" hidden></div>
+    </section>
+
+    <!-- ================= CANCIONES ================= -->
+    <section class="section songs-section" id="canciones" hidden aria-live="polite">
+        <div class="songs-head">
+            <div>
+                <h2 class="title" id="songs-title">Canciones para ti</h2>
+                <p class="section-lead" id="songs-hint"></p>
+            </div>
+            <div class="head-actions" id="head-actions"></div>
+            <button class="link-btn" id="refresh-btn" type="button">Otras canciones</button>
+        </div>
+        <div class="songs" id="songs-container"></div>
+    </section>
+
+    <!-- ================= EXPLORAR ================= -->
+    <section class="section" id="explorar">
+        <h2 class="title">Explorar <span class="brush">todo</span></h2>
+        <div class="cats" id="cat-grid"></div>
+    </section>
+
+    <!-- ================= BIBLIOTECA ================= -->
+    <section class="section" id="biblioteca">
+        <h2 class="title">Tu <span class="brush">biblioteca</span></h2>
+        <div class="lib">
+            <div class="lib-head">
+                <div class="idioma" id="lib-tabs" role="group" aria-label="Tu biblioteca">
+                    <button type="button" data-tab="playlists" class="on">Playlists</button>
+                    <button type="button" data-tab="albumes">Álbumes</button>
+                    <button type="button" data-tab="artistas">Artistas</button>
+                </div>
+                <button class="btn btn-solid btn-sm" id="lib-crear" type="button">＋ Crear</button>
+            </div>
+            <div class="lib-list" id="lib-list"></div>
+        </div>
+    </section>
+
+    <!-- ================= FAVORITAS ================= -->
+    <section class="section" id="favoritas" hidden>
+        <h2 class="title">Mis <span class="brush">favoritas</span></h2>
+        <p class="section-lead">Las canciones que marcaste con ♥. Se guardan en tu cuenta.</p>
+        <div class="songs" id="favs-container"></div>
+    </section>
+
+    <!-- ================= APIS ================= -->
+    <section class="section apis" id="apis">
+        <p class="apis-title">Hecho con 3 APIs gratuitas, sin claves ni registro</p>
+        <div class="api-row">
+            <div class="api"><strong>iTunes Search</strong><span>Canciones, portadas y previews</span></div>
+            <div class="api"><strong>Lyrics.ovh</strong><span>Letras completas</span></div>
+            <div class="api"><strong>Open-Meteo</strong><span>Clima de tu ciudad</span></div>
+        </div>
+    </section>
+</main>
+
+<footer>MoodTunes · Proyecto web con HTML, CSS, JavaScript, Node.js y MySQL<br>Atajos: Espacio pausa · ← → cambian de canción · L letra · F favorito</footer>
+
+<!-- ================= PANEL DE PERFIL ================= -->
+<div class="panel-overlay" id="panel-overlay"></div>
+<aside class="profile-panel" id="profile-panel" aria-hidden="true" aria-label="Perfil de usuario">
+    <div class="pp-cover">
+        <span class="pp-note n1">♪</span><span class="pp-note n2">♫</span><span class="pp-note n3">♬</span>
+        <button class="ctl pp-close" id="close-profile" type="button" aria-label="Cerrar perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></button>
+    </div>
+    <div class="pp-body">
+        <div class="pp-avatar-wrap"><div class="pp-avatar user-avatar" id="panel-avatar">D</div></div>
+        <h3 id="panel-name">Usuario</h3>
+        <p class="pp-email" id="panel-email">correo@ejemplo.com</p>
+        <span class="pp-badge" id="panel-since">Miembro de MoodTunes</span>
+        <div id="pp-view">
+            <div class="pp-stats">
+                <div class="pp-stat"><strong id="st-favs">0</strong><span>♥ Favoritas</span></div>
+                <div class="pp-stat"><strong id="st-pl">0</strong><span>🎶 Playlists</span></div>
+                <div class="pp-stat"><strong id="st-art">0</strong><span>🎤 Álbumes y artistas</span></div>
+                <div class="pp-stat"><strong id="st-plays">0</strong><span>▶ Reproducciones</span></div>
+            </div>
+            <div class="pp-card"><h4>Tus ánimos <small id="mood-top">Aún sin datos</small></h4><div id="mood-bars"></div></div>
+            <div class="pp-card pp-info"><h4>Datos de la cuenta</h4><div class="pp-row"><span>Usuario</span><b id="info-user">—</b></div><div class="pp-row"><span>Correo</span><b id="info-email">—</b></div><div class="pp-row"><span>ID de cuenta</span><b id="info-id">—</b></div></div>
+            <div class="pp-actions"><button class="btn btn-outline" id="btn-edit" type="button">✎ Editar perfil</button><button class="btn btn-danger" id="btn-logout-panel" type="button">Cerrar sesión</button></div>
+        </div>
+        <form id="form-edit" hidden>
+            <div class="pp-card"><h4>Elige tu color</h4><div class="swatches" id="swatches"></div></div>
+            <label class="pp-field">Usuario<input id="ed-user" type="text" required minlength="3" maxlength="30"></label>
+            <label class="pp-field">Correo<input id="ed-email" type="email" required></label>
+            <label class="pp-field">Contraseña actual (para confirmar)<input id="ed-pass" type="password" autocomplete="current-password" required></label>
+            <p class="error" id="ed-error" role="alert"></p>
+            <div class="pp-actions"><button class="btn btn-solid" type="submit">Guardar cambios</button><button class="btn btn-outline" id="btn-edit-cancel" type="button">Cancelar</button></div>
+        </form>
+    </div>
+</aside>
+
+<!-- ================= REPRODUCTOR ================= -->
+<div class="player" id="player" role="region" aria-label="Reproductor">
+    <div class="player-cover" id="player-cover"></div>
+    <div class="player-meta"><div class="player-title" id="player-title">Elige un ánimo para empezar</div><div class="player-artist" id="player-artist">Tu música aparecerá aquí</div></div>
+    <div class="controls">
+        <button class="ctl" id="player-shuffle" type="button" aria-label="Aleatorio" aria-pressed="false"><svg class="stk" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
+        <button class="ctl" id="player-prev" type="button" aria-label="Anterior" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button class="ctl ctl-main" id="player-toggle" type="button" aria-label="Reproducir" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="ctl" id="player-next" type="button" aria-label="Siguiente" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+        <button class="ctl" id="player-repeat" type="button" aria-label="Repetir canción" aria-pressed="false"><svg class="stk" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg></button>
+    </div>
+    <div class="timeline"><span id="time-now">0:00</span><input type="range" class="seek" id="seek" min="0" max="100" step="0.1" value="0" aria-label="Posición" disabled><span id="time-total">0:30</span></div>
+    <input type="range" class="seek vol" id="volume" min="0" max="1" step="0.05" value="0.8" aria-label="Volumen">
+    <button class="btn btn-outline btn-sm" id="player-lyrics" type="button" disabled>Letra</button>
+</div>
+
+<!-- ================= LETRA ================= -->
+<div class="lyrics-view" id="lyrics-container" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="lyrics-song-title">
+    <div class="lv-bg" id="lv-bg" aria-hidden="true"></div>
+    <div class="lv-notes" id="lv-notes" aria-hidden="true"></div>
+    <div class="lv-eq" id="lv-eq" aria-hidden="true"></div>
+    <header class="lv-top">
+        <div class="lv-cover" id="lv-cover" aria-hidden="true"></div>
+        <div class="lv-meta"><h2 id="lyrics-song-title">Letra</h2><p id="lyrics-song-artist"></p></div>
+        <button class="ctl lv-close" id="close-lyrics" type="button" aria-label="Cerrar letra"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></button>
+    </header>
+    <div class="lv-stage" id="lv-stage"><div class="lv-track" id="lyrics-text"></div></div>
+    <footer class="lv-controls">
+        <button class="ctl" id="lv-up" type="button" aria-label="Línea anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+        <button class="ctl ctl-main" id="lv-toggle" type="button" aria-label="Reproducir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="ctl" id="lv-down" type="button" aria-label="Línea siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+        <div class="speed" role="group" aria-label="Velocidad de la letra"><button type="button" data-ritmo="1.45">Lento</button><button type="button" data-ritmo="1" class="on">Normal</button><button type="button" data-ritmo="0.7">Rápido</button></div>
+    </footer>
+</div>
+
+<dialog id="dlg-pl">
+    <h3 id="dlg-titulo">Añadir a playlist</h3>
+    <div id="dlg-list"></div>
+    <form id="dlg-nueva"><input id="dlg-nombre" placeholder="Nueva playlist" maxlength="40" required><button class="btn btn-solid btn-sm" type="submit">Crear</button></form>
+    <button class="link-btn" id="dlg-cerrar" type="button">Listo</button>
+</dialog>
+
+<script src="js/app.js"></script>
+</body>
+</html>
